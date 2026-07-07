@@ -1,0 +1,79 @@
+id: w_scaffold_001
+group: w_scaffold
+version: 1
+title: FastAPI todo with auth
+languages:
+  - python
+prompt: |
+  Build a FastAPI service skeleton with: JWT-based authentication (login,
+  signup, password hashing with bcrypt), a User model + CRUD, a Todo model
+  + CRUD scoped to the authenticated user, alembic migrations, and pytest
+  coverage for the auth flow. Include a README with run instructions.
+expected:
+  min_files:
+    - "app/main.py"
+    - "app/routers/auth.py"
+    - "app/routers/users.py"
+    - "app/routers/todos.py"
+    - "tests/test_auth.py"
+    - "alembic/env.py"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_auth.py::test_login_ok"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "app/main.py"}
+    reads: []
+    writes: ["file:app/main.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/routers/auth.py"}
+    reads: []
+    writes: ["file:app/routers/auth.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/routers/users.py"}
+    reads: []
+    writes: ["file:app/routers/users.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/routers/todos.py"}
+    reads: []
+    writes: ["file:app/routers/todos.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/models/user.py"}
+    reads: []
+    writes: ["file:app/models/user.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/models/todo.py"}
+    reads: []
+    writes: ["file:app/models/todo.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_auth.py"}
+    reads: []
+    writes: ["file:tests/test_auth.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "alembic/env.py"}
+    reads: []
+    writes: ["file:alembic/env.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "README.md"}
+    reads: []
+    writes: ["file:README.md"]
+    side_effect_level: local
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

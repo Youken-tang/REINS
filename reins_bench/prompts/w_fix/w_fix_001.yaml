@@ -1,0 +1,47 @@
+id: w_fix_001
+group: w_fix
+version: 1
+title: off-by-one in pagination cursor
+languages:
+  - python
+prompt: |
+  The /api/users endpoint returns 21 records when limit=20 because the cursor
+  decrement happens after the slice. Find the bug, fix it, add a regression
+  test, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_users_pagination.py"
+  must_pass_tests:
+    - "pytest -q tests/test_users_pagination.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/api/users.py"}
+    reads: ["file:app/api/users.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/api/users.py"}
+    reads: []
+    writes: ["file:app/api/users.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_users_pagination.py"}
+    reads: []
+    writes: ["file:tests/test_users_pagination.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_users_pagination.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

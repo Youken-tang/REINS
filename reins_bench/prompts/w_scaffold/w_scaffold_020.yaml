@@ -1,0 +1,61 @@
+id: w_scaffold_020
+group: w_scaffold
+version: 1
+title: ETL pipeline with prefect 2 + S3 + DuckDB
+languages:
+  - python
+prompt: |
+  Build a Prefect 2 ETL flow that reads gzipped CSVs from a local
+  `data/` directory (mocked S3), normalises columns into a target
+  schema, runs row-level validations with pydantic, writes to a
+  DuckDB file, emits a summary task with row counts. Include a
+  pytest that runs the flow against fixture CSVs and asserts the
+  DuckDB output. Include README with run + test commands.
+expected:
+  min_files:
+    - "flows/etl.py"
+    - "flows/transforms.py"
+    - "flows/validators.py"
+    - "tests/test_etl.py"
+    - "data/sample.csv.gz"
+    - "requirements.txt"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_etl.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "flows/etl.py"}
+    reads: []
+    writes: ["file:flows/etl.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "flows/transforms.py"}
+    reads: []
+    writes: ["file:flows/transforms.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "flows/validators.py"}
+    reads: []
+    writes: ["file:flows/validators.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_etl.py"}
+    reads: []
+    writes: ["file:tests/test_etl.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_etl.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

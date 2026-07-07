@@ -1,0 +1,51 @@
+id: w_fix_020
+group: w_fix
+version: 1
+title: deadlock between two service locks
+languages:
+  - python
+prompt: |
+  `app/services/transfer_service.py` acquires lock_account_a then
+  lock_account_b for transfers from A to B, but a parallel transfer
+  from B to A acquires lock_account_b then lock_account_a, producing
+  classic AB-BA deadlock under concurrent transfers. Enforce a stable
+  lock order (smallest account_id first), add a regression test that
+  spins up two concurrent transfers in opposite directions and asserts
+  both complete, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_transfer_deadlock.py"
+  must_pass_tests:
+    - "pytest -q tests/test_transfer_deadlock.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/services/transfer_service.py"}
+    reads: ["file:app/services/transfer_service.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/services/transfer_service.py"}
+    reads: []
+    writes: ["file:app/services/transfer_service.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_transfer_deadlock.py"}
+    reads: []
+    writes: ["file:tests/test_transfer_deadlock.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_transfer_deadlock.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

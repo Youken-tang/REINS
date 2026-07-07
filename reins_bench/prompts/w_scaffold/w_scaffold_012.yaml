@@ -1,0 +1,54 @@
+id: w_scaffold_012
+group: w_scaffold
+version: 1
+title: Spring Boot REST API with JPA
+languages:
+  - java
+prompt: |
+  Scaffold a Spring Boot 3 service: ProductController + ProductService
+  + ProductRepository (JPA), Bean Validation on POST/PUT, Spring
+  Security with HTTP Basic for write endpoints, Flyway migration for
+  the products table, JUnit 5 + Spring MockMvc test for create + list.
+  Include build.gradle.kts and README.
+expected:
+  min_files:
+    - "src/main/java/com/example/products/ProductController.java"
+    - "src/main/java/com/example/products/ProductService.java"
+    - "src/main/java/com/example/products/Product.java"
+    - "src/test/java/com/example/products/ProductControllerTest.java"
+    - "build.gradle.kts"
+    - "README.md"
+  must_pass_tests:
+    - "./gradlew test --tests com.example.products.ProductControllerTest"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "throw new UnsupportedOperationException"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/main/java/com/example/products/ProductController.java"}
+    reads: []
+    writes: ["file:src/main/java/com/example/products/ProductController.java"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/main/java/com/example/products/ProductService.java"}
+    reads: []
+    writes: ["file:src/main/java/com/example/products/ProductService.java"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "build.gradle.kts"}
+    reads: []
+    writes: ["file:build.gradle.kts"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "./gradlew test --tests com.example.products.ProductControllerTest"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

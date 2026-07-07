@@ -1,0 +1,51 @@
+id: w_fix_009
+group: w_fix
+version: 1
+title: integer overflow in metric aggregator
+languages:
+  - python
+prompt: |
+  `app/metrics/aggregator.py` accumulates per-request byte counts
+  into a 32-bit `int32` numpy column, so high-traffic days wrap and
+  produce negative totals on the dashboard. Switch the accumulator
+  to a width that cannot overflow on realistic loads (`int64` or
+  Python's arbitrary-precision int), add a regression test that
+  feeds enough volume to trigger the old overflow and asserts the
+  positive total, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_aggregator_overflow.py"
+  must_pass_tests:
+    - "pytest -q tests/test_aggregator_overflow.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/metrics/aggregator.py"}
+    reads: ["file:app/metrics/aggregator.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/metrics/aggregator.py"}
+    reads: []
+    writes: ["file:app/metrics/aggregator.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_aggregator_overflow.py"}
+    reads: []
+    writes: ["file:tests/test_aggregator_overflow.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_aggregator_overflow.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

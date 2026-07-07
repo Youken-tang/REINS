@@ -1,0 +1,53 @@
+id: w_fix_023
+group: w_fix
+version: 1
+title: improper error swallowing in async task
+languages:
+  - python
+prompt: |
+  `app/workers/email_worker.py` catches `Exception` in the main loop
+  and `pass`es silently, so transient SMTP errors that should retry
+  and persistent config errors that should page on-call both vanish
+  with no log entry. Replace the bare except with: log the exception
+  with traceback, classify retriable vs fatal, requeue retriable
+  with exponential backoff, raise fatal. Add a regression test that
+  injects each class and asserts the right path fires, and run the
+  test suite.
+expected:
+  min_files:
+    - "tests/test_email_worker_errors.py"
+  must_pass_tests:
+    - "pytest -q tests/test_email_worker_errors.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+    - "except Exception:\n        pass"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/workers/email_worker.py"}
+    reads: ["file:app/workers/email_worker.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/workers/email_worker.py"}
+    reads: []
+    writes: ["file:app/workers/email_worker.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_email_worker_errors.py"}
+    reads: []
+    writes: ["file:tests/test_email_worker_errors.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_email_worker_errors.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

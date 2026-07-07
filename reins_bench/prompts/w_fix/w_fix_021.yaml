@@ -1,0 +1,50 @@
+id: w_fix_021
+group: w_fix
+version: 1
+title: SQL injection in raw query construction
+languages:
+  - python
+prompt: |
+  `app/api/search.py` builds a SQL query with f-string interpolation
+  of `request.args["q"]`, so a crafted query argument can drop tables
+  or exfiltrate data. Replace the raw query with parameterised
+  placeholders (psycopg2 `%s` or SQLAlchemy text bindings), add a
+  regression test that includes a payload like `'; DROP TABLE users; --`
+  and asserts the table still exists, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_search_sqli.py"
+  must_pass_tests:
+    - "pytest -q tests/test_search_sqli.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/api/search.py"}
+    reads: ["file:app/api/search.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/api/search.py"}
+    reads: []
+    writes: ["file:app/api/search.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_search_sqli.py"}
+    reads: []
+    writes: ["file:tests/test_search_sqli.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_search_sqli.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

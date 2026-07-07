@@ -1,0 +1,51 @@
+id: w_fix_024
+group: w_fix
+version: 1
+title: stale field in serialiser after model update
+languages:
+  - python
+prompt: |
+  `app/api/users.py` serialises the User model to JSON via a hand-rolled
+  `to_dict` that hasn't been updated since the `email_verified_at`
+  column was added in migration 0023, so the API silently omits the
+  new field. Switch the serialiser to introspect declared columns
+  (`Model.__table__.columns`) so future schema changes propagate
+  automatically, add a regression test asserting `email_verified_at`
+  appears in the response, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_user_serialiser.py"
+  must_pass_tests:
+    - "pytest -q tests/test_user_serialiser.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/api/users.py"}
+    reads: ["file:app/api/users.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/api/users.py"}
+    reads: []
+    writes: ["file:app/api/users.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_user_serialiser.py"}
+    reads: []
+    writes: ["file:tests/test_user_serialiser.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_user_serialiser.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

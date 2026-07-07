@@ -1,0 +1,59 @@
+id: w_scaffold_003
+group: w_scaffold
+version: 1
+title: Go gin URL shortener
+languages:
+  - go
+prompt: |
+  Build a URL shortener service with Gin + sqlx + Postgres: POST /shorten
+  to create a short code, GET /:code to redirect, in-memory rate limit
+  (10 req/min per IP), graceful shutdown, structured logging via slog.
+  Include go test coverage for the create + redirect paths and a README.
+expected:
+  min_files:
+    - "main.go"
+    - "internal/handler/shorten.go"
+    - "internal/handler/redirect.go"
+    - "internal/store/sqlx.go"
+    - "internal/handler/shorten_test.go"
+    - "go.mod"
+    - "README.md"
+  must_pass_tests:
+    - "go test ./internal/handler/..."
+  forbidden_patterns:
+    - "TODO: implement"
+    - "panic(\"not implemented\")"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "main.go"}
+    reads: []
+    writes: ["file:main.go"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "internal/handler/shorten.go"}
+    reads: []
+    writes: ["file:internal/handler/shorten.go"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "internal/handler/redirect.go"}
+    reads: []
+    writes: ["file:internal/handler/redirect.go"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "internal/store/sqlx.go"}
+    reads: []
+    writes: ["file:internal/store/sqlx.go"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "go test ./internal/handler/..."}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

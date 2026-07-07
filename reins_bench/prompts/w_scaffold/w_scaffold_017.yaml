@@ -1,0 +1,56 @@
+id: w_scaffold_017
+group: w_scaffold
+version: 1
+title: Kafka consumer + producer pipeline
+languages:
+  - python
+prompt: |
+  Build a Kafka producer / consumer pipeline using confluent-kafka:
+  producer reads JSON-line input from stdin and emits to topic
+  `events`, consumer subscribes to `events` and aggregates by
+  `event_type` into a dict, exposes a /metrics HTTP endpoint via
+  Flask. Pytest using kafka-python's MockProducer for the
+  producer-side path + a dict-driven fake for the consumer side.
+  Include docker-compose.yml + README.
+expected:
+  min_files:
+    - "app/producer.py"
+    - "app/consumer.py"
+    - "app/metrics_server.py"
+    - "tests/test_pipeline.py"
+    - "docker-compose.yml"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_pipeline.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "app/producer.py"}
+    reads: []
+    writes: ["file:app/producer.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/consumer.py"}
+    reads: []
+    writes: ["file:app/consumer.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/metrics_server.py"}
+    reads: []
+    writes: ["file:app/metrics_server.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_pipeline.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

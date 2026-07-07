@@ -1,0 +1,51 @@
+id: w_fix_028
+group: w_fix
+version: 1
+title: regex matches across newlines unintentionally
+languages:
+  - python
+prompt: |
+  `app/parsers/markdown.py` extracts code-fence blocks with the regex
+  `r"```(.+?)```"` and the `re.DOTALL` flag inadvertently makes `.+?`
+  span across paragraph breaks, so two adjacent fences merge into
+  one. Anchor the match per-line (drop DOTALL, use `[\s\S]` only inside
+  fences, or split on the closing marker first), add a regression test
+  with two adjacent fences and assert two distinct matches, and run
+  the test suite.
+expected:
+  min_files:
+    - "tests/test_markdown_fences.py"
+  must_pass_tests:
+    - "pytest -q tests/test_markdown_fences.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/parsers/markdown.py"}
+    reads: ["file:app/parsers/markdown.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/parsers/markdown.py"}
+    reads: []
+    writes: ["file:app/parsers/markdown.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_markdown_fences.py"}
+    reads: []
+    writes: ["file:tests/test_markdown_fences.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_markdown_fences.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

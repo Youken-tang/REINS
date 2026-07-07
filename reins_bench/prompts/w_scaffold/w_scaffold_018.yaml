@@ -1,0 +1,57 @@
+id: w_scaffold_018
+group: w_scaffold
+version: 1
+title: SvelteKit blog with markdown frontmatter
+languages:
+  - typescript
+prompt: |
+  Scaffold a SvelteKit blog: file-system routing for `/blog`, `/blog/[slug]`,
+  posts loaded from local `content/*.md` with frontmatter parsing
+  (gray-matter), markdown-it rendering, RSS feed at `/feed.xml`, and
+  a simple Tailwind layout. Include vitest test for the post-list
+  loader, package.json, svelte.config.js, README.
+expected:
+  min_files:
+    - "src/routes/+layout.svelte"
+    - "src/routes/blog/+page.svelte"
+    - "src/routes/blog/[slug]/+page.svelte"
+    - "src/lib/posts.ts"
+    - "src/routes/feed.xml/+server.ts"
+    - "tests/posts.test.ts"
+    - "package.json"
+    - "svelte.config.js"
+    - "README.md"
+  must_pass_tests:
+    - "npx vitest run tests/posts.test.ts"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "throw new Error('not implemented')"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/lib/posts.ts"}
+    reads: []
+    writes: ["file:src/lib/posts.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/routes/blog/+page.svelte"}
+    reads: []
+    writes: ["file:src/routes/blog/+page.svelte"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/routes/feed.xml/+server.ts"}
+    reads: []
+    writes: ["file:src/routes/feed.xml/+server.ts"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "npx vitest run tests/posts.test.ts"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

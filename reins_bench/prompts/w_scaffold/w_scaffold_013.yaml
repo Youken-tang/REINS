@@ -1,0 +1,56 @@
+id: w_scaffold_013
+group: w_scaffold
+version: 1
+title: Vue 3 + Pinia frontend with API mocking
+languages:
+  - typescript
+prompt: |
+  Scaffold a Vue 3 (composition API) frontend: Pinia store for a Todo
+  list, components TodoList + TodoForm, fetch wrapper with msw mocking
+  for tests, vitest + @vue/test-utils covering store mutations + form
+  submission, vite config + tsconfig. Include README.
+expected:
+  min_files:
+    - "src/main.ts"
+    - "src/App.vue"
+    - "src/stores/todos.ts"
+    - "src/components/TodoList.vue"
+    - "src/components/TodoForm.vue"
+    - "tests/store.test.ts"
+    - "package.json"
+    - "vite.config.ts"
+    - "README.md"
+  must_pass_tests:
+    - "npx vitest run tests/store.test.ts"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "throw new Error('not implemented')"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/stores/todos.ts"}
+    reads: []
+    writes: ["file:src/stores/todos.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/components/TodoList.vue"}
+    reads: []
+    writes: ["file:src/components/TodoList.vue"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/store.test.ts"}
+    reads: []
+    writes: ["file:tests/store.test.ts"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "npx vitest run tests/store.test.ts"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

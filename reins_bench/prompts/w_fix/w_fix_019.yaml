@@ -1,0 +1,51 @@
+id: w_fix_019
+group: w_fix
+version: 1
+title: missing transaction rollback on exception
+languages:
+  - python
+prompt: |
+  `app/services/order_service.py` performs three sequential SQL writes
+  (insert order, decrement inventory, charge customer) but on exception
+  in the middle write the order row stays committed while inventory
+  doesn't decrement. Wrap the operation in a single transaction with
+  proper rollback semantics, add a regression test that injects a
+  failure on step 2 and asserts no order row remains, and run the
+  test suite.
+expected:
+  min_files:
+    - "tests/test_order_rollback.py"
+  must_pass_tests:
+    - "pytest -q tests/test_order_rollback.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/services/order_service.py"}
+    reads: ["file:app/services/order_service.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/services/order_service.py"}
+    reads: []
+    writes: ["file:app/services/order_service.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_order_rollback.py"}
+    reads: []
+    writes: ["file:tests/test_order_rollback.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_order_rollback.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

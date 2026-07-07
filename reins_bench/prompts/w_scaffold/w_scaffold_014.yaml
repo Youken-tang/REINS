@@ -1,0 +1,54 @@
+id: w_scaffold_014
+group: w_scaffold
+version: 1
+title: gRPC service with protobuf-defined contract
+languages:
+  - python
+prompt: |
+  Build a Python gRPC service for a Notes API: protobuf with Note message
+  + NoteService (Create / Get / List / Delete), generated stubs via
+  grpcio-tools, in-memory store with thread-safe access, server entry
+  point that listens on port 50051, pytest test that uses an in-process
+  channel to call Create + Get and asserts equality. Include README.
+expected:
+  min_files:
+    - "proto/notes.proto"
+    - "app/server.py"
+    - "app/store.py"
+    - "tests/test_grpc_notes.py"
+    - "requirements.txt"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_grpc_notes.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "proto/notes.proto"}
+    reads: []
+    writes: ["file:proto/notes.proto"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/server.py"}
+    reads: []
+    writes: ["file:app/server.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_grpc_notes.py"}
+    reads: []
+    writes: ["file:tests/test_grpc_notes.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_grpc_notes.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

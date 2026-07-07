@@ -1,0 +1,464 @@
+{
+  "_doc": "REINS-Bench corpus compiled from §1.5.2 yaml prompts. W_fix 30 + W_scaffold 20 = 50 entries. Compatible with T1.b/T1.d/T2.a/T2.b CorpusEntry loader.",
+  "_schema": {
+    "id": "stable id (e.g. w_fix_001, w_scaffold_007)",
+    "category": "W_fix | W_scaffold",
+    "language": "python | typescript | go | rust | java",
+    "title": "human-readable label",
+    "prompt": "objective sent to the planner",
+    "expected_min_tools": "lower bound on tool_calls (advisory)",
+    "notes": "optional commentary"
+  },
+  "items": [
+    {
+      "id": "w_fix_001",
+      "category": "W_fix",
+      "language": "python",
+      "title": "off-by-one in pagination cursor",
+      "prompt": "The /api/users endpoint returns 21 records when limit=20 because the cursor\ndecrement happens after the slice. Find the bug, fix it, add a regression\ntest, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_002",
+      "category": "W_fix",
+      "language": "python",
+      "title": "race condition in counter increment",
+      "prompt": "In `app/services/counter.py`, the `increment` method reads, mutates,\nand writes a shared dict without locking, so concurrent calls drop\nupdates under load. Identify the race, fix it (a lock, an atomic\nprimitive, or a redesign — your call), add a regression test that\nspins up multiple threads and asserts the final count, and run the\ntest suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_003",
+      "category": "W_fix",
+      "language": "python",
+      "title": "timezone-naive datetime in API response",
+      "prompt": "The `/api/events` endpoint serialises `event.created_at` with\n`datetime.utcnow()` and no timezone info, so clients in non-UTC\nzones display events one offset off. Make the timestamps explicitly\nUTC-aware on the wire (ISO-8601 with `Z` or `+00:00`), add a test\nthat pins the JSON shape, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_004",
+      "category": "W_fix",
+      "language": "python",
+      "title": "SQL N+1 in user-with-orders endpoint",
+      "prompt": "`/api/users/<id>/orders` issues one query for the user and then one\nquery per order to load each line item, producing N+1 queries on a\nlarge account. Refactor the loader to fetch line items in a single\njoined query (or a `selectinload` on the relationship), add a\nregression test that asserts the query count is bounded, and run the\nsuite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_005",
+      "category": "W_fix",
+      "language": "python",
+      "title": "file handle leak in CSV importer",
+      "prompt": "`app/importers/csv_importer.py` opens the source file with `open()`\nbut never closes it on the early-return error paths, so long-running\nprocesses leak descriptors and eventually hit `EMFILE`. Refactor the\nopen calls to use a context manager (or an explicit close in\n`finally`), add a test that verifies no descriptor is leaked across\none good import + one failing import, and run the suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_006",
+      "category": "W_fix",
+      "language": "python",
+      "title": "rounding error in invoice total",
+      "prompt": "`app/billing/invoice.py` totals line items with floating-point\narithmetic and produces values like `0.30000000000000004` for what\nshould be `0.30`, which then fails downstream equality checks against\nthe expected total. Switch the totalling code to `decimal.Decimal`\nwith an explicit quantisation (or an integer-cents representation),\nadd a regression test that asserts exact equality on the affected\ncase, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_007",
+      "category": "W_fix",
+      "language": "python",
+      "title": "cache invalidation skipped on update",
+      "prompt": "`app/services/profile_cache.py` writes through to the database on\n`update_profile` but forgets to invalidate the in-memory cache,\nso subsequent reads return stale data until the cache TTL expires.\nWire the invalidation in (delete or set the new value), add a\nregression test that asserts a read after an update reflects the\nnew value, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_008",
+      "category": "W_fix",
+      "language": "python",
+      "title": "missing pagination in admin user list",
+      "prompt": "`/api/admin/users` returns the full user table in one response.\nOn a database with 50k users this triggers OOM in the JSON\nserialiser and times out the upstream proxy. Add cursor-based\npagination (`?cursor=`, `?limit=`) with a sane default and max\nlimit, add a regression test covering first-page, mid-stream, and\nlast-page behaviour, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_009",
+      "category": "W_fix",
+      "language": "python",
+      "title": "integer overflow in metric aggregator",
+      "prompt": "`app/metrics/aggregator.py` accumulates per-request byte counts\ninto a 32-bit `int32` numpy column, so high-traffic days wrap and\nproduce negative totals on the dashboard. Switch the accumulator\nto a width that cannot overflow on realistic loads (`int64` or\nPython's arbitrary-precision int), add a regression test that\nfeeds enough volume to trigger the old overflow and asserts the\npositive total, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_010",
+      "category": "W_fix",
+      "language": "python",
+      "title": "incorrect json escape in webhook signer",
+      "prompt": "`app/webhooks/signer.py` builds the canonical request body for HMAC\nsigning by `json.dumps(payload)` with default settings, but the\nupstream verifier expects `ensure_ascii=False` and sorted keys,\nso any payload containing non-ASCII characters or unsorted keys\nfails signature verification. Align the signer with the verifier's\ncanonical form, add a regression test using a payload with a CJK\nstring and out-of-order keys, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_011",
+      "category": "W_fix",
+      "language": "python",
+      "title": "retry loop swallows non-retriable errors",
+      "prompt": "`app/clients/payment_client.py` wraps every API call in a generic\nretry-on-exception loop, so non-retriable errors (validation errors,\nhard 4xx) are retried until the budget is exhausted and only then\nsurfaced as a generic timeout. Restrict retries to genuinely\ntransient classes (network errors, 5xx, explicit retry signals),\nre-raise other exceptions immediately, add a regression test that\nasserts a 422 is raised on the first attempt, and run the test\nsuite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_012",
+      "category": "W_fix",
+      "language": "python",
+      "title": "regex catastrophic backtracking in log parser",
+      "prompt": "`app/parsers/log_parser.py` uses a regex like `(.*),(.*),(.*)`\nwith greedy `.*` to split log lines, which exhibits catastrophic\nbacktracking on pathological inputs and stalls log ingestion for\nminutes. Replace the regex with an unambiguous form (anchored,\nnon-greedy, or just `str.split`), add a regression test that\nparses a known-pathological line within a hard timeout, and run\nthe test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_013",
+      "category": "W_fix",
+      "language": "python",
+      "title": "env var read at import time",
+      "prompt": "`app/config/settings.py` reads `os.environ[\"DATABASE_URL\"]` at\nmodule import time and assigns it to a module-level constant, so\ntests that monkeypatch the env var after import always see the\noriginal value and silently exercise the wrong database. Defer\nthe env read into a function (or a lazy property), add a\nregression test that monkeypatches the env var, calls the\naccessor, and asserts the new value is reflected, then run the\ntest suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_014",
+      "category": "W_fix",
+      "language": "python",
+      "title": "silent UnicodeDecodeError on log ingest",
+      "prompt": "`app/ingest/file_reader.py` reads incoming log files with\n`open(path).read()` (default platform encoding), so files written\nby upstream services in UTF-8 with non-ASCII bytes raise\n`UnicodeDecodeError` on Latin-1 hosts and the ingest worker\nsilently skips the rest of the batch. Pin the open call to\n`encoding=\"utf-8\"` with `errors=\"replace\"` (or another deliberate\npolicy), add a regression test that feeds a UTF-8 sample\ncontaining CJK characters and asserts the contents round-trip,\nand run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_015",
+      "category": "W_fix",
+      "language": "python",
+      "title": "thundering herd on cache miss",
+      "prompt": "`app/cache/loader.py` recomputes an expensive value on every cache\nmiss, but when the cached entry expires under traffic, dozens of\nconcurrent requests all see the miss and recompute simultaneously,\nhammering the upstream database. Add single-flight de-duplication\n(per-key lock, future, or `cachetools.cached`-style coalescing)\nso only one request recomputes and the others await the result,\nadd a regression test that fires concurrent gets on a cold key\nand asserts the loader was invoked exactly once, and run the\ntest suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_016",
+      "category": "W_fix",
+      "language": "python",
+      "title": "TOCTOU race in temp file creation",
+      "prompt": "`app/utils/tempfile_helper.py` checks `os.path.exists(path)` and then\ncalls `open(path, \"w\")` if missing — a classic TOCTOU window where\ntwo concurrent processes both pass the check and one overwrites the\nother's data. Switch to `os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)`\n(or `tempfile.NamedTemporaryFile`), add a regression test that races\ntwo threads and asserts only one succeeds, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_017",
+      "category": "W_fix",
+      "language": "python",
+      "title": "connection pool exhaustion under load",
+      "prompt": "`app/db/pool.py` opens a new psycopg2 connection per request and never\ncloses it on the success path, so under sustained traffic the database\nrejects connections after pool_max_size is hit. Wire the connections\nthrough a context manager (or pool.putconn in finally), add a\nregression test that fires N+1 sequential requests where N=pool_max\nand asserts none fail with «connection limit», and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_018",
+      "category": "W_fix",
+      "language": "python",
+      "title": "timezone confusion in scheduled job",
+      "prompt": "`app/jobs/scheduler.py` mixes `datetime.now()` (naive, server-local) and\n`datetime.now(timezone.utc)` when comparing the next-run time against\n«now», so jobs fire 8 hours early or late depending on host TZ. Pin\nevery datetime path to UTC-aware, add a regression test that simulates\na non-UTC host and asserts the next-run computation is correct, and\nrun the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_019",
+      "category": "W_fix",
+      "language": "python",
+      "title": "missing transaction rollback on exception",
+      "prompt": "`app/services/order_service.py` performs three sequential SQL writes\n(insert order, decrement inventory, charge customer) but on exception\nin the middle write the order row stays committed while inventory\ndoesn't decrement. Wrap the operation in a single transaction with\nproper rollback semantics, add a regression test that injects a\nfailure on step 2 and asserts no order row remains, and run the\ntest suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_020",
+      "category": "W_fix",
+      "language": "python",
+      "title": "deadlock between two service locks",
+      "prompt": "`app/services/transfer_service.py` acquires lock_account_a then\nlock_account_b for transfers from A to B, but a parallel transfer\nfrom B to A acquires lock_account_b then lock_account_a, producing\nclassic AB-BA deadlock under concurrent transfers. Enforce a stable\nlock order (smallest account_id first), add a regression test that\nspins up two concurrent transfers in opposite directions and asserts\nboth complete, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_021",
+      "category": "W_fix",
+      "language": "python",
+      "title": "SQL injection in raw query construction",
+      "prompt": "`app/api/search.py` builds a SQL query with f-string interpolation\nof `request.args[\"q\"]`, so a crafted query argument can drop tables\nor exfiltrate data. Replace the raw query with parameterised\nplaceholders (psycopg2 `%s` or SQLAlchemy text bindings), add a\nregression test that includes a payload like `'; DROP TABLE users; --`\nand asserts the table still exists, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_022",
+      "category": "W_fix",
+      "language": "python",
+      "title": "missing input validation on API boundary",
+      "prompt": "`app/api/upload.py` accepts a `size` query parameter and passes it\nunchecked to `bytearray(size)`, so a request with `size=10000000000`\nattempts a 10 GB allocation and crashes the worker. Add bounded\nvalidation (`int` cast + range check 0..MAX_UPLOAD_BYTES), return\nHTTP 400 on out-of-range, add a regression test for both valid and\noversize inputs, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_023",
+      "category": "W_fix",
+      "language": "python",
+      "title": "improper error swallowing in async task",
+      "prompt": "`app/workers/email_worker.py` catches `Exception` in the main loop\nand `pass`es silently, so transient SMTP errors that should retry\nand persistent config errors that should page on-call both vanish\nwith no log entry. Replace the bare except with: log the exception\nwith traceback, classify retriable vs fatal, requeue retriable\nwith exponential backoff, raise fatal. Add a regression test that\ninjects each class and asserts the right path fires, and run the\ntest suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_024",
+      "category": "W_fix",
+      "language": "python",
+      "title": "stale field in serialiser after model update",
+      "prompt": "`app/api/users.py` serialises the User model to JSON via a hand-rolled\n`to_dict` that hasn't been updated since the `email_verified_at`\ncolumn was added in migration 0023, so the API silently omits the\nnew field. Switch the serialiser to introspect declared columns\n(`Model.__table__.columns`) so future schema changes propagate\nautomatically, add a regression test asserting `email_verified_at`\nappears in the response, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_025",
+      "category": "W_fix",
+      "language": "python",
+      "title": "signed-token verification skips expiry check",
+      "prompt": "`app/auth/token.py` verifies a JWT signature but accidentally drops\nthe `verify_exp=True` flag when refactoring to PyJWT v2 — so expired\ntokens still authenticate. Restore expiry verification, add a\nregression test that crafts a token with `exp` in the past and\nasserts `decode()` raises `ExpiredSignatureError`, and run the\ntest suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_026",
+      "category": "W_fix",
+      "language": "python",
+      "title": "idempotency missing on payment intent",
+      "prompt": "`app/api/payments.py` creates a Stripe payment intent on every POST\nwith no idempotency key, so a client retry on a flaky network double-\ncharges the customer. Pass an idempotency key derived from\n`(user_id, order_id, amount)` to Stripe's `PaymentIntent.create`,\nadd a regression test that calls the endpoint twice with the same\nbody and asserts only one charge, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_027",
+      "category": "W_fix",
+      "language": "python",
+      "title": "missing rate-limit on login endpoint",
+      "prompt": "`app/api/auth.py` exposes `/login` with no rate-limiting, allowing\nunbounded credential stuffing from one IP. Add a per-IP sliding-window\nlimiter (e.g. 10 attempts per 15 minutes) backed by Redis or an\nin-memory store with TTL, return HTTP 429 when exceeded, add a\nregression test that fires N+1 attempts and asserts the last is\nrate-limited, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_028",
+      "category": "W_fix",
+      "language": "python",
+      "title": "regex matches across newlines unintentionally",
+      "prompt": "`app/parsers/markdown.py` extracts code-fence blocks with the regex\n`r\"```(.+?)```\"` and the `re.DOTALL` flag inadvertently makes `.+?`\nspan across paragraph breaks, so two adjacent fences merge into\none. Anchor the match per-line (drop DOTALL, use `[\\s\\S]` only inside\nfences, or split on the closing marker first), add a regression test\nwith two adjacent fences and assert two distinct matches, and run\nthe test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_029",
+      "category": "W_fix",
+      "language": "python",
+      "title": "missing CSRF token check on state-changing endpoint",
+      "prompt": "`app/api/profile.py` exposes a POST `/profile/email` endpoint with\nno CSRF token verification, so a malicious site can change a\nvictim's email by submitting a form while the user is logged in.\nAdd CSRF token validation (compare cookie + header, time-constant\ncomparison), return HTTP 403 on mismatch, add a regression test\nfor both valid + missing token paths, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_fix_030",
+      "category": "W_fix",
+      "language": "python",
+      "title": "floating-point comparison without epsilon",
+      "prompt": "`app/services/inventory.py` checks `if running_total == target_total`\nto verify reconciliation, but accumulated floating-point error from\nthousands of small additions makes the equality fail even when the\ntotals match to 8 decimal places. Use `math.isclose(a, b, abs_tol=1e-6)`\n(or pre-multiply by a power of 10 to integer-cents), add a regression\ntest that runs a 10000-step accumulation and asserts the check\nsucceeds, and run the test suite.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_001",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "FastAPI todo with auth",
+      "prompt": "Build a FastAPI service skeleton with: JWT-based authentication (login,\nsignup, password hashing with bcrypt), a User model + CRUD, a Todo model\n+ CRUD scoped to the authenticated user, alembic migrations, and pytest\ncoverage for the auth flow. Include a README with run instructions.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_002",
+      "category": "W_scaffold",
+      "language": "typescript",
+      "title": "Express + Mongoose REST API with auth",
+      "prompt": "Build an Express + Mongoose service: User and Post models, JWT-based\nauth (register, login, refresh), CRUD for posts scoped to the\nauthenticated user, validation via zod, environment config via\ndotenv, jest tests covering at least the auth flow + post creation.\nInclude a README with run + test instructions.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_003",
+      "category": "W_scaffold",
+      "language": "go",
+      "title": "Go gin URL shortener",
+      "prompt": "Build a URL shortener service with Gin + sqlx + Postgres: POST /shorten\nto create a short code, GET /:code to redirect, in-memory rate limit\n(10 req/min per IP), graceful shutdown, structured logging via slog.\nInclude go test coverage for the create + redirect paths and a README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_004",
+      "category": "W_scaffold",
+      "language": "typescript",
+      "title": "Next.js 14 admin dashboard with Drizzle",
+      "prompt": "Scaffold a Next.js 14 (app router) admin dashboard: Drizzle ORM with\nPostgres, server actions for CRUD on a Customer table, a /customers\npage listing rows with pagination, /customers/[id] for edit, login\npage guarded by NextAuth credentials provider, basic Tailwind layout.\nInclude a vitest test for the create-customer server action and a\nREADME with run instructions.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_005",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "Flask + SQLAlchemy blog with comments",
+      "prompt": "Build a Flask blog: SQLAlchemy models for User / Post / Comment,\nFlask-Login session auth, Markdown post rendering via markdown2,\nCRUD for posts (author-scoped) + nested comments, alembic migrations,\npytest covering the login + post creation flow. Include a README\nwith run + test instructions.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_006",
+      "category": "W_scaffold",
+      "language": "typescript",
+      "title": "GraphQL server with Apollo + Prisma",
+      "prompt": "Build an Apollo GraphQL server backed by Prisma + Postgres: schema\nfor User and Project (one-to-many), queries (`me`, `project`,\n`projects`), mutations (`createProject`, `updateProject`,\n`deleteProject`), JWT auth middleware on the GraphQL context, a\nvitest test that runs `createProject` against an in-memory store.\nInclude README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_007",
+      "category": "W_scaffold",
+      "language": "rust",
+      "title": "Rust axum REST API with sqlx",
+      "prompt": "Build a Rust axum service with sqlx + Postgres: a Customer resource\nwith POST/GET/PUT/DELETE, JWT auth via tower middleware, structured\nconfig via figment, error handling via thiserror + custom IntoResponse,\na single integration test using reqwest against a mock pool. Include\nCargo.toml + README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_008",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "Django REST Framework polls API",
+      "prompt": "Scaffold a Django + DRF polls service: Poll and Choice models, viewset\nfor CRUD on polls, voting endpoint that increments choice count\natomically (select_for_update), TokenAuthentication, throttling\n(10 votes/min/user), pytest-django covering the vote flow, and\na manage.py + settings module. Include a README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_009",
+      "category": "W_scaffold",
+      "language": "typescript",
+      "title": "NestJS microservice with TypeORM",
+      "prompt": "Build a NestJS microservice for a billing module: TypeORM with Postgres,\nInvoice and LineItem entities (one-to-many cascade), controller for\ncreate/list/get, JwtGuard on the controller, validation pipes via\nclass-validator, jest e2e test that creates an invoice with two line\nitems and asserts the total. Include README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_010",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "Python Click CLI for log analysis",
+      "prompt": "Build a Click-based CLI tool `loganalyze` with subcommands: `parse`\n(read JSON-lines stdin and emit a per-event-type histogram),\n`tail-errors` (stream events from a file and print only level=error),\n`summary` (compute p50/p95 latency from `duration_ms`). Include\npyproject.toml with the entry point, pytest covering each subcommand\nusing a fixture file, README with example commands.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_011",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "Tornado WebSocket chat server",
+      "prompt": "Build a Tornado WebSocket chat server: a single /ws endpoint, in-memory\nroom registry, broadcast on `say`, presence via `join`/`leave` system\nmessages, persistent message history (last 100) loaded on connect from\nRedis, structured JSON messages, pytest covering one client sending +\none client receiving via tornado.testing.AsyncHTTPTestCase. Include\nREADME.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_012",
+      "category": "W_scaffold",
+      "language": "java",
+      "title": "Spring Boot REST API with JPA",
+      "prompt": "Scaffold a Spring Boot 3 service: ProductController + ProductService\n+ ProductRepository (JPA), Bean Validation on POST/PUT, Spring\nSecurity with HTTP Basic for write endpoints, Flyway migration for\nthe products table, JUnit 5 + Spring MockMvc test for create + list.\nInclude build.gradle.kts and README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_013",
+      "category": "W_scaffold",
+      "language": "typescript",
+      "title": "Vue 3 + Pinia frontend with API mocking",
+      "prompt": "Scaffold a Vue 3 (composition API) frontend: Pinia store for a Todo\nlist, components TodoList + TodoForm, fetch wrapper with msw mocking\nfor tests, vitest + @vue/test-utils covering store mutations + form\nsubmission, vite config + tsconfig. Include README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_014",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "gRPC service with protobuf-defined contract",
+      "prompt": "Build a Python gRPC service for a Notes API: protobuf with Note message\n+ NoteService (Create / Get / List / Delete), generated stubs via\ngrpcio-tools, in-memory store with thread-safe access, server entry\npoint that listens on port 50051, pytest test that uses an in-process\nchannel to call Create + Get and asserts equality. Include README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_015",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "Celery task queue with Redis broker",
+      "prompt": "Scaffold a Celery worker setup: Redis broker + result backend, three\ntasks (`send_email`, `generate_thumbnail`, `recompute_metrics`) with\nretry policy, beat schedule for the metrics task, pytest using\n`celery.contrib.pytest` to run tasks eagerly and assert state\ntransitions. Include README with worker + beat run commands.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_016",
+      "category": "W_scaffold",
+      "language": "typescript",
+      "title": "React + Vite todo SPA with localStorage",
+      "prompt": "Scaffold a React 18 + Vite todo SPA: components TodoList,\nTodoItem, TodoForm; useReducer for state; localStorage persistence\nvia useEffect; CSS Modules or Tailwind; vitest + @testing-library/react\ncovering add/toggle/delete actions; deploy-ready vite config. Include\npackage.json, tsconfig, README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_017",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "Kafka consumer + producer pipeline",
+      "prompt": "Build a Kafka producer / consumer pipeline using confluent-kafka:\nproducer reads JSON-line input from stdin and emits to topic\n`events`, consumer subscribes to `events` and aggregates by\n`event_type` into a dict, exposes a /metrics HTTP endpoint via\nFlask. Pytest using kafka-python's MockProducer for the\nproducer-side path + a dict-driven fake for the consumer side.\nInclude docker-compose.yml + README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_018",
+      "category": "W_scaffold",
+      "language": "typescript",
+      "title": "SvelteKit blog with markdown frontmatter",
+      "prompt": "Scaffold a SvelteKit blog: file-system routing for `/blog`, `/blog/[slug]`,\nposts loaded from local `content/*.md` with frontmatter parsing\n(gray-matter), markdown-it rendering, RSS feed at `/feed.xml`, and\na simple Tailwind layout. Include vitest test for the post-list\nloader, package.json, svelte.config.js, README.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_019",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "Async FastAPI + httpx external API aggregator",
+      "prompt": "Build an async FastAPI service that aggregates data from three\nexternal HTTP APIs concurrently using httpx.AsyncClient: a\n`/dashboard/{user_id}` endpoint that fetches profile from\napi-A, recent activity from api-B, and recommendations from api-C\nin parallel and merges the results. Include retry/timeout policy,\npytest with respx mocks for the three upstreams, and asserts\nend-to-end response < 2x slowest upstream wall.",
+      "expected_min_tools": 5,
+      "notes": ""
+    },
+    {
+      "id": "w_scaffold_020",
+      "category": "W_scaffold",
+      "language": "python",
+      "title": "ETL pipeline with prefect 2 + S3 + DuckDB",
+      "prompt": "Build a Prefect 2 ETL flow that reads gzipped CSVs from a local\n`data/` directory (mocked S3), normalises columns into a target\nschema, runs row-level validations with pydantic, writes to a\nDuckDB file, emits a summary task with row counts. Include a\npytest that runs the flow against fixture CSVs and asserts the\nDuckDB output. Include README with run + test commands.",
+      "expected_min_tools": 5,
+      "notes": ""
+    }
+  ]
+}

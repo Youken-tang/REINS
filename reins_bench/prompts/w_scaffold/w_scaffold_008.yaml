@@ -1,0 +1,55 @@
+id: w_scaffold_008
+group: w_scaffold
+version: 1
+title: Django REST Framework polls API
+languages:
+  - python
+prompt: |
+  Scaffold a Django + DRF polls service: Poll and Choice models, viewset
+  for CRUD on polls, voting endpoint that increments choice count
+  atomically (select_for_update), TokenAuthentication, throttling
+  (10 votes/min/user), pytest-django covering the vote flow, and
+  a manage.py + settings module. Include a README.
+expected:
+  min_files:
+    - "polls/models.py"
+    - "polls/views.py"
+    - "polls/serializers.py"
+    - "polls/urls.py"
+    - "tests/test_voting.py"
+    - "manage.py"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_voting.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "polls/models.py"}
+    reads: []
+    writes: ["file:polls/models.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "polls/views.py"}
+    reads: []
+    writes: ["file:polls/views.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "polls/serializers.py"}
+    reads: []
+    writes: ["file:polls/serializers.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_voting.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

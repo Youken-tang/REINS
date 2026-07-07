@@ -1,0 +1,51 @@
+id: w_fix_012
+group: w_fix
+version: 1
+title: regex catastrophic backtracking in log parser
+languages:
+  - python
+prompt: |
+  `app/parsers/log_parser.py` uses a regex like `(.*),(.*),(.*)`
+  with greedy `.*` to split log lines, which exhibits catastrophic
+  backtracking on pathological inputs and stalls log ingestion for
+  minutes. Replace the regex with an unambiguous form (anchored,
+  non-greedy, or just `str.split`), add a regression test that
+  parses a known-pathological line within a hard timeout, and run
+  the test suite.
+expected:
+  min_files:
+    - "tests/test_log_parser_perf.py"
+  must_pass_tests:
+    - "pytest -q tests/test_log_parser_perf.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/parsers/log_parser.py"}
+    reads: ["file:app/parsers/log_parser.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/parsers/log_parser.py"}
+    reads: []
+    writes: ["file:app/parsers/log_parser.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_log_parser_perf.py"}
+    reads: []
+    writes: ["file:tests/test_log_parser_perf.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_log_parser_perf.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

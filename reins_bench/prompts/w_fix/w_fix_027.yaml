@@ -1,0 +1,50 @@
+id: w_fix_027
+group: w_fix
+version: 1
+title: missing rate-limit on login endpoint
+languages:
+  - python
+prompt: |
+  `app/api/auth.py` exposes `/login` with no rate-limiting, allowing
+  unbounded credential stuffing from one IP. Add a per-IP sliding-window
+  limiter (e.g. 10 attempts per 15 minutes) backed by Redis or an
+  in-memory store with TTL, return HTTP 429 when exceeded, add a
+  regression test that fires N+1 attempts and asserts the last is
+  rate-limited, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_auth_ratelimit.py"
+  must_pass_tests:
+    - "pytest -q tests/test_auth_ratelimit.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/api/auth.py"}
+    reads: ["file:app/api/auth.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/api/auth.py"}
+    reads: []
+    writes: ["file:app/api/auth.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_auth_ratelimit.py"}
+    reads: []
+    writes: ["file:tests/test_auth_ratelimit.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_auth_ratelimit.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

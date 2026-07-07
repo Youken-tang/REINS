@@ -1,0 +1,50 @@
+id: w_scaffold_011
+group: w_scaffold
+version: 1
+title: Tornado WebSocket chat server
+languages:
+  - python
+prompt: |
+  Build a Tornado WebSocket chat server: a single /ws endpoint, in-memory
+  room registry, broadcast on `say`, presence via `join`/`leave` system
+  messages, persistent message history (last 100) loaded on connect from
+  Redis, structured JSON messages, pytest covering one client sending +
+  one client receiving via tornado.testing.AsyncHTTPTestCase. Include
+  README.
+expected:
+  min_files:
+    - "app/server.py"
+    - "app/handlers.py"
+    - "app/store.py"
+    - "tests/test_chat.py"
+    - "requirements.txt"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_chat.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "app/server.py"}
+    reads: []
+    writes: ["file:app/server.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/handlers.py"}
+    reads: []
+    writes: ["file:app/handlers.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_chat.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

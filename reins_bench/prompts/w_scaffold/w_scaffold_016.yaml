@@ -1,0 +1,58 @@
+id: w_scaffold_016
+group: w_scaffold
+version: 1
+title: React + Vite todo SPA with localStorage
+languages:
+  - typescript
+prompt: |
+  Scaffold a React 18 + Vite todo SPA: components TodoList,
+  TodoItem, TodoForm; useReducer for state; localStorage persistence
+  via useEffect; CSS Modules or Tailwind; vitest + @testing-library/react
+  covering add/toggle/delete actions; deploy-ready vite config. Include
+  package.json, tsconfig, README.
+expected:
+  min_files:
+    - "src/main.tsx"
+    - "src/App.tsx"
+    - "src/components/TodoList.tsx"
+    - "src/components/TodoItem.tsx"
+    - "src/components/TodoForm.tsx"
+    - "src/reducer.ts"
+    - "tests/reducer.test.ts"
+    - "package.json"
+    - "tsconfig.json"
+    - "README.md"
+  must_pass_tests:
+    - "npx vitest run tests/reducer.test.ts"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "throw new Error('not implemented')"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/App.tsx"}
+    reads: []
+    writes: ["file:src/App.tsx"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/reducer.ts"}
+    reads: []
+    writes: ["file:src/reducer.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/components/TodoList.tsx"}
+    reads: []
+    writes: ["file:src/components/TodoList.tsx"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "npx vitest run tests/reducer.test.ts"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

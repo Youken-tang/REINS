@@ -1,0 +1,72 @@
+id: w_scaffold_002
+group: w_scaffold
+version: 1
+title: Express + Mongoose REST API with auth
+languages:
+  - typescript
+prompt: |
+  Build an Express + Mongoose service: User and Post models, JWT-based
+  auth (register, login, refresh), CRUD for posts scoped to the
+  authenticated user, validation via zod, environment config via
+  dotenv, jest tests covering at least the auth flow + post creation.
+  Include a README with run + test instructions.
+expected:
+  min_files:
+    - "src/index.ts"
+    - "src/routes/auth.ts"
+    - "src/routes/posts.ts"
+    - "src/models/User.ts"
+    - "src/models/Post.ts"
+    - "tests/auth.test.ts"
+    - "package.json"
+    - "tsconfig.json"
+    - "README.md"
+  must_pass_tests:
+    - "npx jest tests/auth.test.ts"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "throw new Error('not implemented')"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/index.ts"}
+    reads: []
+    writes: ["file:src/index.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/routes/auth.ts"}
+    reads: []
+    writes: ["file:src/routes/auth.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/routes/posts.ts"}
+    reads: []
+    writes: ["file:src/routes/posts.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/models/User.ts"}
+    reads: []
+    writes: ["file:src/models/User.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/models/Post.ts"}
+    reads: []
+    writes: ["file:src/models/Post.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "package.json"}
+    reads: []
+    writes: ["file:package.json"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "npx jest tests/auth.test.ts"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

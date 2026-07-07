@@ -1,0 +1,53 @@
+id: w_fix_015
+group: w_fix
+version: 1
+title: thundering herd on cache miss
+languages:
+  - python
+prompt: |
+  `app/cache/loader.py` recomputes an expensive value on every cache
+  miss, but when the cached entry expires under traffic, dozens of
+  concurrent requests all see the miss and recompute simultaneously,
+  hammering the upstream database. Add single-flight de-duplication
+  (per-key lock, future, or `cachetools.cached`-style coalescing)
+  so only one request recomputes and the others await the result,
+  add a regression test that fires concurrent gets on a cold key
+  and asserts the loader was invoked exactly once, and run the
+  test suite.
+expected:
+  min_files:
+    - "tests/test_cache_loader_singleflight.py"
+  must_pass_tests:
+    - "pytest -q tests/test_cache_loader_singleflight.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/cache/loader.py"}
+    reads: ["file:app/cache/loader.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/cache/loader.py"}
+    reads: []
+    writes: ["file:app/cache/loader.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_cache_loader_singleflight.py"}
+    reads: []
+    writes: ["file:tests/test_cache_loader_singleflight.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_cache_loader_singleflight.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

@@ -1,0 +1,56 @@
+id: w_scaffold_006
+group: w_scaffold
+version: 1
+title: GraphQL server with Apollo + Prisma
+languages:
+  - typescript
+prompt: |
+  Build an Apollo GraphQL server backed by Prisma + Postgres: schema
+  for User and Project (one-to-many), queries (`me`, `project`,
+  `projects`), mutations (`createProject`, `updateProject`,
+  `deleteProject`), JWT auth middleware on the GraphQL context, a
+  vitest test that runs `createProject` against an in-memory store.
+  Include README.
+expected:
+  min_files:
+    - "src/index.ts"
+    - "src/schema.ts"
+    - "src/resolvers.ts"
+    - "prisma/schema.prisma"
+    - "tests/createProject.test.ts"
+    - "package.json"
+    - "README.md"
+  must_pass_tests:
+    - "npx vitest run tests/createProject.test.ts"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "throw new Error('not implemented')"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/schema.ts"}
+    reads: []
+    writes: ["file:src/schema.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/resolvers.ts"}
+    reads: []
+    writes: ["file:src/resolvers.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "prisma/schema.prisma"}
+    reads: []
+    writes: ["file:prisma/schema.prisma"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "npx vitest run tests/createProject.test.ts"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

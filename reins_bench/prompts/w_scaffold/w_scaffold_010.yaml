@@ -1,0 +1,55 @@
+id: w_scaffold_010
+group: w_scaffold
+version: 1
+title: Python Click CLI for log analysis
+languages:
+  - python
+prompt: |
+  Build a Click-based CLI tool `loganalyze` with subcommands: `parse`
+  (read JSON-lines stdin and emit a per-event-type histogram),
+  `tail-errors` (stream events from a file and print only level=error),
+  `summary` (compute p50/p95 latency from `duration_ms`). Include
+  pyproject.toml with the entry point, pytest covering each subcommand
+  using a fixture file, README with example commands.
+expected:
+  min_files:
+    - "src/loganalyze/__init__.py"
+    - "src/loganalyze/cli.py"
+    - "src/loganalyze/parse.py"
+    - "tests/test_cli.py"
+    - "pyproject.toml"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_cli.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/loganalyze/cli.py"}
+    reads: []
+    writes: ["file:src/loganalyze/cli.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/loganalyze/parse.py"}
+    reads: []
+    writes: ["file:src/loganalyze/parse.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_cli.py"}
+    reads: []
+    writes: ["file:tests/test_cli.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_cli.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

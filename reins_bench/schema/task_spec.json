@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://reins-bench.org/schema/task_spec.json",
+  "title": "REINS-Bench Task Spec",
+  "description": "One prompt under benchmark/REINS-Bench/prompts/<group>/<id>.yaml. See test_plan.md §1.5.2.",
+  "type": "object",
+  "required": ["id", "group", "prompt"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Stable identifier; appears in result file names."
+    },
+    "group": {
+      "type": "string",
+      "enum": ["w_fix", "w_scaffold"],
+      "description": "Workload class; controls reporting buckets."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Bump on any prompt or ground-truth change."
+    },
+    "title": {
+      "type": "string"
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["python", "typescript", "javascript", "go", "rust", "java", "mixed"]
+      },
+      "uniqueItems": true
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The objective sent to the planner."
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_files": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Glob patterns; pass_rate gate requires every entry to match at least one workspace file."
+        },
+        "must_pass_tests": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Shell commands run inside the workspace; non-zero exit fails the run."
+        },
+        "forbidden_patterns": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Regex literals; if any matches any workspace file the run fails."
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "max_input_tokens": {"type": "integer", "minimum": 0},
+        "max_output_tokens": {"type": "integer", "minimum": 0}
+      }
+    },
+    "ground_truth_resource_access": {
+      "type": "array",
+      "description": "Per-call ResourceAccess oracle. Optional for W_fix; complete for W_scaffold.",
+      "items": {
+        "type": "object",
+        "required": ["tool"],
+        "additionalProperties": false,
+        "properties": {
+          "tool": {"type": "string"},
+          "args": {"type": "object"},
+          "reads": {"type": "array", "items": {"type": "string"}},
+          "writes": {"type": "array", "items": {"type": "string"}},
+          "appends": {"type": "array", "items": {"type": "string"}},
+          "side_effect_level": {
+            "type": "string",
+            "enum": ["none", "local", "external"]
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["hand-authored", "swe_bench_lite", "gh_issue"]
+        },
+        "source_ref": {"type": "string"},
+        "license": {"type": "string"}
+      }
+    }
+  }
+}

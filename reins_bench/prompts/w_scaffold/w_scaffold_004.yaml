@@ -1,0 +1,62 @@
+id: w_scaffold_004
+group: w_scaffold
+version: 1
+title: Next.js 14 admin dashboard with Drizzle
+languages:
+  - typescript
+prompt: |
+  Scaffold a Next.js 14 (app router) admin dashboard: Drizzle ORM with
+  Postgres, server actions for CRUD on a Customer table, a /customers
+  page listing rows with pagination, /customers/[id] for edit, login
+  page guarded by NextAuth credentials provider, basic Tailwind layout.
+  Include a vitest test for the create-customer server action and a
+  README with run instructions.
+expected:
+  min_files:
+    - "app/layout.tsx"
+    - "app/customers/page.tsx"
+    - "app/customers/[id]/page.tsx"
+    - "app/api/auth/[...nextauth]/route.ts"
+    - "drizzle/schema.ts"
+    - "tests/customer.test.ts"
+    - "package.json"
+    - "README.md"
+  must_pass_tests:
+    - "npx vitest run tests/customer.test.ts"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "throw new Error('not implemented')"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "app/layout.tsx"}
+    reads: []
+    writes: ["file:app/layout.tsx"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/customers/page.tsx"}
+    reads: []
+    writes: ["file:app/customers/page.tsx"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "drizzle/schema.ts"}
+    reads: []
+    writes: ["file:drizzle/schema.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/customer.test.ts"}
+    reads: []
+    writes: ["file:tests/customer.test.ts"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "npx vitest run tests/customer.test.ts"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

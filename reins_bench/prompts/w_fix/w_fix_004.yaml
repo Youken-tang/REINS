@@ -1,0 +1,55 @@
+id: w_fix_004
+group: w_fix
+version: 1
+title: SQL N+1 in user-with-orders endpoint
+languages:
+  - python
+prompt: |
+  `/api/users/<id>/orders` issues one query for the user and then one
+  query per order to load each line item, producing N+1 queries on a
+  large account. Refactor the loader to fetch line items in a single
+  joined query (or a `selectinload` on the relationship), add a
+  regression test that asserts the query count is bounded, and run the
+  suite.
+expected:
+  min_files:
+    - "tests/test_users_orders_n_plus_one.py"
+  must_pass_tests:
+    - "pytest -q tests/test_users_orders_n_plus_one.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/api/users.py"}
+    reads: ["file:app/api/users.py"]
+    writes: []
+    side_effect_level: none
+  - tool: read_file
+    args: {path: "app/models/order.py"}
+    reads: ["file:app/models/order.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/api/users.py"}
+    reads: []
+    writes: ["file:app/api/users.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_users_orders_n_plus_one.py"}
+    reads: []
+    writes: ["file:tests/test_users_orders_n_plus_one.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_users_orders_n_plus_one.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

@@ -1,0 +1,50 @@
+id: w_fix_017
+group: w_fix
+version: 1
+title: connection pool exhaustion under load
+languages:
+  - python
+prompt: |
+  `app/db/pool.py` opens a new psycopg2 connection per request and never
+  closes it on the success path, so under sustained traffic the database
+  rejects connections after pool_max_size is hit. Wire the connections
+  through a context manager (or pool.putconn in finally), add a
+  regression test that fires N+1 sequential requests where N=pool_max
+  and asserts none fail with «connection limit», and run the test suite.
+expected:
+  min_files:
+    - "tests/test_pool_exhaustion.py"
+  must_pass_tests:
+    - "pytest -q tests/test_pool_exhaustion.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/db/pool.py"}
+    reads: ["file:app/db/pool.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/db/pool.py"}
+    reads: []
+    writes: ["file:app/db/pool.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_pool_exhaustion.py"}
+    reads: []
+    writes: ["file:tests/test_pool_exhaustion.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_pool_exhaustion.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

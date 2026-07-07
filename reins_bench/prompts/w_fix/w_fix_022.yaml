@@ -1,0 +1,50 @@
+id: w_fix_022
+group: w_fix
+version: 1
+title: missing input validation on API boundary
+languages:
+  - python
+prompt: |
+  `app/api/upload.py` accepts a `size` query parameter and passes it
+  unchecked to `bytearray(size)`, so a request with `size=10000000000`
+  attempts a 10 GB allocation and crashes the worker. Add bounded
+  validation (`int` cast + range check 0..MAX_UPLOAD_BYTES), return
+  HTTP 400 on out-of-range, add a regression test for both valid and
+  oversize inputs, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_upload_validation.py"
+  must_pass_tests:
+    - "pytest -q tests/test_upload_validation.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/api/upload.py"}
+    reads: ["file:app/api/upload.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/api/upload.py"}
+    reads: []
+    writes: ["file:app/api/upload.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_upload_validation.py"}
+    reads: []
+    writes: ["file:tests/test_upload_validation.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_upload_validation.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

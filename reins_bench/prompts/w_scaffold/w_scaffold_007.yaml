@@ -1,0 +1,55 @@
+id: w_scaffold_007
+group: w_scaffold
+version: 1
+title: Rust axum REST API with sqlx
+languages:
+  - rust
+prompt: |
+  Build a Rust axum service with sqlx + Postgres: a Customer resource
+  with POST/GET/PUT/DELETE, JWT auth via tower middleware, structured
+  config via figment, error handling via thiserror + custom IntoResponse,
+  a single integration test using reqwest against a mock pool. Include
+  Cargo.toml + README.
+expected:
+  min_files:
+    - "src/main.rs"
+    - "src/routes/customers.rs"
+    - "src/auth.rs"
+    - "src/db.rs"
+    - "tests/customers_integration.rs"
+    - "Cargo.toml"
+    - "README.md"
+  must_pass_tests:
+    - "cargo test --test customers_integration"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "todo!()"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/main.rs"}
+    reads: []
+    writes: ["file:src/main.rs"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/routes/customers.rs"}
+    reads: []
+    writes: ["file:src/routes/customers.rs"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "Cargo.toml"}
+    reads: []
+    writes: ["file:Cargo.toml"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "cargo test --test customers_integration"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

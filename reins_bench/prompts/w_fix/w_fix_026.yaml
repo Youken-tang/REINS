@@ -1,0 +1,50 @@
+id: w_fix_026
+group: w_fix
+version: 1
+title: idempotency missing on payment intent
+languages:
+  - python
+prompt: |
+  `app/api/payments.py` creates a Stripe payment intent on every POST
+  with no idempotency key, so a client retry on a flaky network double-
+  charges the customer. Pass an idempotency key derived from
+  `(user_id, order_id, amount)` to Stripe's `PaymentIntent.create`,
+  add a regression test that calls the endpoint twice with the same
+  body and asserts only one charge, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_payment_idempotency.py"
+  must_pass_tests:
+    - "pytest -q tests/test_payment_idempotency.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/api/payments.py"}
+    reads: ["file:app/api/payments.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/api/payments.py"}
+    reads: []
+    writes: ["file:app/api/payments.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_payment_idempotency.py"}
+    reads: []
+    writes: ["file:tests/test_payment_idempotency.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_payment_idempotency.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

@@ -1,0 +1,50 @@
+id: w_fix_008
+group: w_fix
+version: 1
+title: missing pagination in admin user list
+languages:
+  - python
+prompt: |
+  `/api/admin/users` returns the full user table in one response.
+  On a database with 50k users this triggers OOM in the JSON
+  serialiser and times out the upstream proxy. Add cursor-based
+  pagination (`?cursor=`, `?limit=`) with a sane default and max
+  limit, add a regression test covering first-page, mid-stream, and
+  last-page behaviour, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_admin_users_pagination.py"
+  must_pass_tests:
+    - "pytest -q tests/test_admin_users_pagination.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/api/admin_users.py"}
+    reads: ["file:app/api/admin_users.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/api/admin_users.py"}
+    reads: []
+    writes: ["file:app/api/admin_users.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_admin_users_pagination.py"}
+    reads: []
+    writes: ["file:tests/test_admin_users_pagination.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_admin_users_pagination.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

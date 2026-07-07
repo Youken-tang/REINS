@@ -1,0 +1,51 @@
+id: w_fix_006
+group: w_fix
+version: 1
+title: rounding error in invoice total
+languages:
+  - python
+prompt: |
+  `app/billing/invoice.py` totals line items with floating-point
+  arithmetic and produces values like `0.30000000000000004` for what
+  should be `0.30`, which then fails downstream equality checks against
+  the expected total. Switch the totalling code to `decimal.Decimal`
+  with an explicit quantisation (or an integer-cents representation),
+  add a regression test that asserts exact equality on the affected
+  case, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_invoice_rounding.py"
+  must_pass_tests:
+    - "pytest -q tests/test_invoice_rounding.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/billing/invoice.py"}
+    reads: ["file:app/billing/invoice.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/billing/invoice.py"}
+    reads: []
+    writes: ["file:app/billing/invoice.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_invoice_rounding.py"}
+    reads: []
+    writes: ["file:tests/test_invoice_rounding.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_invoice_rounding.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

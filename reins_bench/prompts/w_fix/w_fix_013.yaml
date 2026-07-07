@@ -1,0 +1,52 @@
+id: w_fix_013
+group: w_fix
+version: 1
+title: env var read at import time
+languages:
+  - python
+prompt: |
+  `app/config/settings.py` reads `os.environ["DATABASE_URL"]` at
+  module import time and assigns it to a module-level constant, so
+  tests that monkeypatch the env var after import always see the
+  original value and silently exercise the wrong database. Defer
+  the env read into a function (or a lazy property), add a
+  regression test that monkeypatches the env var, calls the
+  accessor, and asserts the new value is reflected, then run the
+  test suite.
+expected:
+  min_files:
+    - "tests/test_settings_lazy_env.py"
+  must_pass_tests:
+    - "pytest -q tests/test_settings_lazy_env.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/config/settings.py"}
+    reads: ["file:app/config/settings.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/config/settings.py"}
+    reads: []
+    writes: ["file:app/config/settings.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_settings_lazy_env.py"}
+    reads: []
+    writes: ["file:tests/test_settings_lazy_env.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_settings_lazy_env.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

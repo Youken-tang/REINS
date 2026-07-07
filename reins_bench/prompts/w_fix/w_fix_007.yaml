@@ -1,0 +1,50 @@
+id: w_fix_007
+group: w_fix
+version: 1
+title: cache invalidation skipped on update
+languages:
+  - python
+prompt: |
+  `app/services/profile_cache.py` writes through to the database on
+  `update_profile` but forgets to invalidate the in-memory cache,
+  so subsequent reads return stale data until the cache TTL expires.
+  Wire the invalidation in (delete or set the new value), add a
+  regression test that asserts a read after an update reflects the
+  new value, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_profile_cache_invalidation.py"
+  must_pass_tests:
+    - "pytest -q tests/test_profile_cache_invalidation.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/services/profile_cache.py"}
+    reads: ["file:app/services/profile_cache.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/services/profile_cache.py"}
+    reads: []
+    writes: ["file:app/services/profile_cache.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_profile_cache_invalidation.py"}
+    reads: []
+    writes: ["file:tests/test_profile_cache_invalidation.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_profile_cache_invalidation.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

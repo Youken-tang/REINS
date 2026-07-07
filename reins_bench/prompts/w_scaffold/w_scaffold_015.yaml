@@ -1,0 +1,54 @@
+id: w_scaffold_015
+group: w_scaffold
+version: 1
+title: Celery task queue with Redis broker
+languages:
+  - python
+prompt: |
+  Scaffold a Celery worker setup: Redis broker + result backend, three
+  tasks (`send_email`, `generate_thumbnail`, `recompute_metrics`) with
+  retry policy, beat schedule for the metrics task, pytest using
+  `celery.contrib.pytest` to run tasks eagerly and assert state
+  transitions. Include README with worker + beat run commands.
+expected:
+  min_files:
+    - "app/celery_app.py"
+    - "app/tasks/email.py"
+    - "app/tasks/thumbnail.py"
+    - "app/tasks/metrics.py"
+    - "tests/test_tasks.py"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_tasks.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "app/celery_app.py"}
+    reads: []
+    writes: ["file:app/celery_app.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/tasks/email.py"}
+    reads: []
+    writes: ["file:app/tasks/email.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/tasks/thumbnail.py"}
+    reads: []
+    writes: ["file:app/tasks/thumbnail.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_tasks.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

@@ -1,0 +1,61 @@
+id: w_scaffold_019
+group: w_scaffold
+version: 1
+title: Async FastAPI + httpx external API aggregator
+languages:
+  - python
+prompt: |
+  Build an async FastAPI service that aggregates data from three
+  external HTTP APIs concurrently using httpx.AsyncClient: a
+  `/dashboard/{user_id}` endpoint that fetches profile from
+  api-A, recent activity from api-B, and recommendations from api-C
+  in parallel and merges the results. Include retry/timeout policy,
+  pytest with respx mocks for the three upstreams, and asserts
+  end-to-end response < 2x slowest upstream wall.
+expected:
+  min_files:
+    - "app/main.py"
+    - "app/aggregator.py"
+    - "app/clients.py"
+    - "tests/test_aggregator.py"
+    - "requirements.txt"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_aggregator.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "app/main.py"}
+    reads: []
+    writes: ["file:app/main.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/aggregator.py"}
+    reads: []
+    writes: ["file:app/aggregator.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/clients.py"}
+    reads: []
+    writes: ["file:app/clients.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_aggregator.py"}
+    reads: []
+    writes: ["file:tests/test_aggregator.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_aggregator.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

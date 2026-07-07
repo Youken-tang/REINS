@@ -1,0 +1,56 @@
+id: w_scaffold_009
+group: w_scaffold
+version: 1
+title: NestJS microservice with TypeORM
+languages:
+  - typescript
+prompt: |
+  Build a NestJS microservice for a billing module: TypeORM with Postgres,
+  Invoice and LineItem entities (one-to-many cascade), controller for
+  create/list/get, JwtGuard on the controller, validation pipes via
+  class-validator, jest e2e test that creates an invoice with two line
+  items and asserts the total. Include README.
+expected:
+  min_files:
+    - "src/main.ts"
+    - "src/billing/billing.module.ts"
+    - "src/billing/billing.controller.ts"
+    - "src/billing/billing.service.ts"
+    - "src/billing/entities/invoice.entity.ts"
+    - "test/billing.e2e-spec.ts"
+    - "package.json"
+    - "README.md"
+  must_pass_tests:
+    - "npx jest test/billing.e2e-spec.ts"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "throw new Error('not implemented')"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "src/billing/billing.module.ts"}
+    reads: []
+    writes: ["file:src/billing/billing.module.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/billing/billing.controller.ts"}
+    reads: []
+    writes: ["file:src/billing/billing.controller.ts"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "src/billing/entities/invoice.entity.ts"}
+    reads: []
+    writes: ["file:src/billing/entities/invoice.entity.ts"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "npx jest test/billing.e2e-spec.ts"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

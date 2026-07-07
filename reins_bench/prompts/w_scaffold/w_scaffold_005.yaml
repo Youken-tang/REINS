@@ -1,0 +1,60 @@
+id: w_scaffold_005
+group: w_scaffold
+version: 1
+title: Flask + SQLAlchemy blog with comments
+languages:
+  - python
+prompt: |
+  Build a Flask blog: SQLAlchemy models for User / Post / Comment,
+  Flask-Login session auth, Markdown post rendering via markdown2,
+  CRUD for posts (author-scoped) + nested comments, alembic migrations,
+  pytest covering the login + post creation flow. Include a README
+  with run + test instructions.
+expected:
+  min_files:
+    - "app/__init__.py"
+    - "app/models.py"
+    - "app/blueprints/auth.py"
+    - "app/blueprints/posts.py"
+    - "tests/test_blog.py"
+    - "alembic/env.py"
+    - "README.md"
+  must_pass_tests:
+    - "pytest -q tests/test_blog.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 900
+  max_input_tokens: 200000
+  max_output_tokens: 60000
+ground_truth_resource_access:
+  - tool: write_file
+    args: {path: "app/__init__.py"}
+    reads: []
+    writes: ["file:app/__init__.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/models.py"}
+    reads: []
+    writes: ["file:app/models.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/blueprints/auth.py"}
+    reads: []
+    writes: ["file:app/blueprints/auth.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "app/blueprints/posts.py"}
+    reads: []
+    writes: ["file:app/blueprints/posts.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_blog.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

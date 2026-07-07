@@ -1,0 +1,50 @@
+id: w_fix_002
+group: w_fix
+version: 1
+title: race condition in counter increment
+languages:
+  - python
+prompt: |
+  In `app/services/counter.py`, the `increment` method reads, mutates,
+  and writes a shared dict without locking, so concurrent calls drop
+  updates under load. Identify the race, fix it (a lock, an atomic
+  primitive, or a redesign — your call), add a regression test that
+  spins up multiple threads and asserts the final count, and run the
+  test suite.
+expected:
+  min_files:
+    - "tests/test_counter_race.py"
+  must_pass_tests:
+    - "pytest -q tests/test_counter_race.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/services/counter.py"}
+    reads: ["file:app/services/counter.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/services/counter.py"}
+    reads: []
+    writes: ["file:app/services/counter.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_counter_race.py"}
+    reads: []
+    writes: ["file:tests/test_counter_race.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_counter_race.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0

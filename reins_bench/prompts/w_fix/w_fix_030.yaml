@@ -1,0 +1,51 @@
+id: w_fix_030
+group: w_fix
+version: 1
+title: floating-point comparison without epsilon
+languages:
+  - python
+prompt: |
+  `app/services/inventory.py` checks `if running_total == target_total`
+  to verify reconciliation, but accumulated floating-point error from
+  thousands of small additions makes the equality fail even when the
+  totals match to 8 decimal places. Use `math.isclose(a, b, abs_tol=1e-6)`
+  (or pre-multiply by a power of 10 to integer-cents), add a regression
+  test that runs a 10000-step accumulation and asserts the check
+  succeeds, and run the test suite.
+expected:
+  min_files:
+    - "tests/test_inventory_reconcile.py"
+  must_pass_tests:
+    - "pytest -q tests/test_inventory_reconcile.py"
+  forbidden_patterns:
+    - "TODO: implement"
+    - "raise NotImplementedError"
+budget:
+  max_wall_seconds: 600
+  max_input_tokens: 120000
+  max_output_tokens: 30000
+ground_truth_resource_access:
+  - tool: read_file
+    args: {path: "app/services/inventory.py"}
+    reads: ["file:app/services/inventory.py"]
+    writes: []
+    side_effect_level: none
+  - tool: write_file
+    args: {path: "app/services/inventory.py"}
+    reads: []
+    writes: ["file:app/services/inventory.py"]
+    side_effect_level: local
+  - tool: write_file
+    args: {path: "tests/test_inventory_reconcile.py"}
+    reads: []
+    writes: ["file:tests/test_inventory_reconcile.py"]
+    side_effect_level: local
+  - tool: run_tests
+    args: {command: "pytest -q tests/test_inventory_reconcile.py"}
+    reads: ["dir:."]
+    writes: []
+    side_effect_level: external
+notes:
+  source: hand-authored
+  source_ref: ""
+  license: CC-BY-4.0
