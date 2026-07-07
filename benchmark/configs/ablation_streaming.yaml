@@ -1,0 +1,24 @@
+#-2: −streaming_dispatch
+#
+# Hides ModelClient.complete_streaming{,_async} so the controller cannot
+# take the early ``on_tool_call`` path. Tool calls only land after the
+# planner response finishes, so the runtime never gets a head-start
+# during the planner's stream. Wall-clock impact concentrates on
+# planner→submit lag.
+#
+# Pair with: trace replay — the planner's tool_calls sequence is
+# fixed by replay, so the only difference is when they arrive.
+ablation:
+  resource_aware: true
+  streaming_dispatch: false
+  critical_path_refill: true
+  bounded_context: true
+  suspend_resume: true
+
+run:
+  max_workers: 8
+  delivery_debounce: 0.05
+  max_iterations: 40
+  max_planner_requests: 4
+  delivery_timeout: 30.0
+  runs_per_prompt: 3

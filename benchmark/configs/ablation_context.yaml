@@ -1,0 +1,24 @@
+#-4: −bounded_context
+#
+# Multiplies all controller context caps (planner / durable / facts /
+# known reads / per-fact) by 10 so the planner sees the full
+# transcript instead of the bounded view. Token usage explodes;
+# wall_seconds may go either way (longer prompts = longer RTT, but
+# more visible context can avoid re-asks).
+#
+# Pair with: F3 ledger_digest_size_p95 will jump roughly 10×; F6 LLM
+# RTT share rises with the prompt size.
+ablation:
+  resource_aware: true
+  streaming_dispatch: true
+  critical_path_refill: true
+  bounded_context: false
+  suspend_resume: true
+
+run:
+  max_workers: 8
+  delivery_debounce: 0.05
+  max_iterations: 40
+  max_planner_requests: 4
+  delivery_timeout: 30.0
+  runs_per_prompt: 3

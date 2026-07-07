@@ -1,0 +1,24 @@
+#-5: −suspend_resume
+#
+# Hides ModelClient.complete_async (and complete_streaming_async — they
+# share the same Future surface) so the controller falls back to the
+# sync ``complete()`` path. The planner's caller thread blocks for the
+# full LLM RTT, which under multi-planner concurrency holds a worker
+# slot the runtime could otherwise have used for tools.
+#
+# Pair with: F6 llm_rtt_share rises sharply; effective parallelism
+# (basic.parallelism_efficiency) drops because workers idle on RTT.
+ablation:
+  resource_aware: true
+  streaming_dispatch: true
+  critical_path_refill: true
+  bounded_context: true
+  suspend_resume: false
+
+run:
+  max_workers: 8
+  delivery_debounce: 0.05
+  max_iterations: 40
+  max_planner_requests: 4
+  delivery_timeout: 30.0
+  runs_per_prompt: 3

@@ -1,0 +1,27 @@
+#-1: −resource_aware
+#
+# Disables the access_conflicts gate in CausalRuntime._first_conflict_locked
+# so the scheduler treats every ready task as runnable. Concurrent
+# write/write and write/read overlaps land in the workspace, which is
+# exactly what we want to measure: REINS-vs-no-REINS corruption rate +
+# wall-clock when the resource arbitration is gone.
+#
+# Composes with: nothing — this flag intentionally exercises the worst
+# case (full parallel attempts, no arbitration).
+#
+# Pair with:'s W_scaffold subset (fan-out heavy) and the W_fix bug
+# reproducers known to involve overlapping edits.
+ablation:
+  resource_aware: false
+  streaming_dispatch: true
+  critical_path_refill: true
+  bounded_context: true
+  suspend_resume: true
+
+run:
+  max_workers: 8
+  delivery_debounce: 0.05
+  max_iterations: 40
+  max_planner_requests: 4
+  delivery_timeout: 30.0
+  runs_per_prompt: 3

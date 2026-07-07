@@ -1,0 +1,24 @@
+#-3: −critical_path_refill
+#
+# Neutralises AgentRunController._on_critical_path_progress so the
+# planner refill only fires when the runtime actually idles. With this
+# flag off, high-fanout tasks no longer trigger early-fanout planner
+# requests; the planner waits for delivery batches like a non-REINS
+# scheduler would.
+#
+# Pair with: W_scaffold subset; F5 critical-path-stall histogram
+# is the headline metric here.
+ablation:
+  resource_aware: true
+  streaming_dispatch: true
+  critical_path_refill: false
+  bounded_context: true
+  suspend_resume: true
+
+run:
+  max_workers: 8
+  delivery_debounce: 0.05
+  max_iterations: 40
+  max_planner_requests: 4
+  delivery_timeout: 30.0
+  runs_per_prompt: 3
